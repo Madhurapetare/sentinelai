@@ -1,2 +1,3 @@
 ml-service/notebooks/data/*.csv
+!ml-service/notebooks/data/sample_transactions.csv
 ml-service/venv/
