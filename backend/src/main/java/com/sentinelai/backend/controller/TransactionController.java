@@ -1,6 +1,7 @@
 package com.sentinelai.backend.controller;
 
 import com.sentinelai.backend.dto.TransactionRequest;
+import com.sentinelai.backend.dto.TransactionStats;
 import com.sentinelai.backend.model.Transaction;
 import com.sentinelai.backend.repository.TransactionRepository;
 import jakarta.validation.Valid;
@@ -8,6 +9,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -42,6 +47,20 @@ public class TransactionController {
     public ResponseEntity<Page<Transaction>> getAllTransactions(Pageable pageable) {
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
         return ResponseEntity.ok(transactions);
+    }
+
+    // STATS - summary numbers for the dashboard
+    @GetMapping("/stats")
+    public ResponseEntity<TransactionStats> getStats() {
+        long totalCount = transactionRepository.count();
+        BigDecimal totalAmount = transactionRepository.getTotalAmount();
+
+        Map<String, Long> typeBreakdown = new HashMap<>();
+        for (Object[] row : transactionRepository.countByType()) {
+            typeBreakdown.put((String) row[0], (Long) row[1]);
+        }
+
+        return ResponseEntity.ok(new TransactionStats(totalCount, totalAmount, typeBreakdown));
     }
 
     // READ ONE - get a single transaction by ID
